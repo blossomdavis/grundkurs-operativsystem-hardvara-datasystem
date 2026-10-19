@@ -1,4 +1,4 @@
-#### Datacenter
+# Datacenter
 Här är en sammanfattning vad ett Datacenter består av. 
 
 ### 1. Kärnan: Servrar (Servers)
@@ -41,7 +41,7 @@ För att hålla igång utrustningen och miljön på ett säkert sätt krävs omf
 * **Fysisk säkerhet:** Kameror, biometriska skannrar och passerkontroller för att skydda tillgångarna.
 
 
-#### Miljöstandarder och riktlinjer
+## Miljöstandarder och riktlinjer
 Här är en sammanfattning av det viktigaste ur varje källtext/ämne:
 
 ### 1. EU Code of Conduct for Data Centre Energy Efficiency
@@ -77,7 +77,7 @@ Här är en sammanfattning av det viktigaste ur varje källtext/ämne:
 
 * **Mätmetoder:** Ger vägledning i hur man samlar in data och mäter på rätt sätt för att jämföra prestanda över tid eller mellan olika anläggningar.
 
-## 2 st åtgärder för att följa EU Code of Conduct for Data Centres
+#### 2 st åtgärder för att följa EU Code of Conduct for Data Centres
 
 För att ett företag ska leva upp till EU Code of Conduct (CoC) för energieffektiva datacenter krävs konkreta åtgärder inom drift och teknik. Här är två centrala åtgärder som ofta krävs:
 
@@ -104,7 +104,7 @@ För att ett företag ska leva upp till EU Code of Conduct (CoC) för energieffe
 ---
 
 
-#### Fysisk och digital säkerhetsinfrastruktur för datacenter
+## Fysisk och digital säkerhetsinfrastruktur för datacenter
 
 Här är en sammanfattning om hur man designar en robust och säker fysisk samt digital säkerhetsarkitektur för datacenter. Den fokuserar på modeller, strategier och ramverk snarare än bara en enkel checklista.
 
