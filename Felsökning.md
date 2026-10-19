@@ -53,96 +53,128 @@ Videon diskuterar hur AI (som ChatGPT eller Claude) praktiskt kan lyfta ditt arb
 
 
 # Fusk-blad
+### 0. Gör ingen skada (Backups & Snapshots)
 
-## 1. Informationsinhämtning: Läs systemets "Svarta låda"
+Innan du börjar ändra konfigurationer, ta bort filer eller köra reparationskommandon:
+Om du är i en virtuell miljö (VMware/Hyper-V/VirtualBox) – ta en snapshot! I produktion: Säkerställ att det finns en backup.
 
-Börja alltid här. Gissa aldrig vad felet är, låt operativsystemet berätta det för dig.
+### 1. Informationsinhämtning: Läs systemets "Svarta låda"
+
+Gissa aldrig vad felet är, låt operativsystemet berätta det för dig.
 
 | Mål | Ubuntu (Linux) | Windows 11 / Server |
 | --- | --- | --- |
 | **Allmänna systemloggar** | `journalctl -f` (följ live)<br>
 
-<br>`tail -f /var/log/syslog` | **Event Viewer** (Loggboken) -> Windows Logs -> System / Application |
-| **Säkerhet & Inloggning** | `tail -f /var/log/auth.log`<br>
-
-<br>(Sök efter "Failed password") | **Event Viewer** -> Security.<br>
-
-<br>Leta efter Event ID **4624** (lyckad) / **4625** (misslyckad). |
+<br>`tail -f /var/log/syslog` | **Event Viewer** -> Windows Logs -> System / Application |
+| **Säkerhet & Inloggning** | `tail -f /var/log/auth.log` | **Event Viewer** -> Security (Leta efter ID 4624/4625) |
 | **Specifik tjänst/app** | `journalctl -u sshd --since yesterday` | PowerShell: `Get-WinEvent -LogName Application -MaxEvents 50` |
-| **Hårdvara/Kärna** | `dmesg | tail` |
-
-> **Pro-tips för Windows:** I Server-miljöer är PowerShell din bästa vän för loggar. Cmdleten `Get-WinEvent` är Windows motsvarighet till `journalctl`.
+| **Historiska krascher** | `journalctl -b -1` (loggar från förra uppstarten) | **Event Viewer** -> System (Filtrera på "Critical" eller "Error") |
 
 ---
 
 ### 2. Prestanda och Resursövervakning
 
-Om maskinen är seg, kraschar eller beter sig konstigt, kontrollera systemets "vitalparametrar".
+När maskinen är seg, fryser eller beter sig konstigt.
 
 | Mål | Ubuntu (Linux) | Windows 11 / Server |
 | --- | --- | --- |
-| **CPU & RAM (Live)** | `top` eller `htop` (lättare att läsa) | **Task Manager** (Ctrl+Shift+Esc) eller **Resource Monitor** (`resmon`) |
+| **CPU & RAM (Live)** | `top` eller `htop` | **Task Manager** eller **Resource Monitor** (`resmon`) |
 | **Kontrollera RAM** | `free -h` | PowerShell: `Get-Process | Sort-Object WorkingSet -Descending` |
-| **Disk & Utrymme** | `df -h` (översikt)<br>
+| **Disk & Utrymme** | `df -h`<br>
 
-<br>`du -sh /var/log/*` (hitta stora filer) | Den här datorn (GUI)<br>
-
-<br>PowerShell: `Get-Volume` |
-| **Detaljerad process** | `strace -p <PID>` (fördjupad felsökning) | **Sysinternals Process Monitor (ProcMon)** |
+<br>`du -sh /var/log/*` (hitta stora filer) | PowerShell: `Get-Volume` |
+| **Detaljerad process** | `strace -p <PID>` | **Sysinternals Process Monitor (ProcMon)** |
 
 ---
 
-### 3. Nätverk och Tjänster
-
-När en maskin är igång men inte går att nå över nätverket.
+### 3. Nätverk Grundläggande (Anslutningar & Portar)
 
 *Verification:* Kan du nå maskinen lokalt men inte externt? Då är det nästan alltid brandväggen.
 
 | Mål | Ubuntu (Linux) | Windows 11 / Server |
 | --- | --- | --- |
-| **Lyssnar tjänsten?** | `ss -tuln` | `netstat -ano` (Hitta PID och kolla i Task Manager vilken app det är) |
-| **Testa port/uppkoppling** | `curl -v http://IP` eller `telnet IP port` | PowerShell: `Test-NetConnection -ComputerName IP -Port 80` |
-| **Brandväggsstatus** | `sudo ufw status verbose` | PowerShell: `Get-NetFirewallProfile` eller GUI: "Windows Defender Firewall" |
-| **Kolla IP-konfiguration** | `ip a` | `ipconfig /all` |
+| **Lyssnar tjänsten?** | `ss -tuln` | `netstat -ano` (Kolla PID i Task Manager) |
+| **Testa port** | `curl -v http://IP` eller `telnet IP port` | PowerShell: `Test-NetConnection -ComputerName IP -Port 80` |
+| **Brandväggsstatus** | `sudo ufw status verbose` | PowerShell: `Get-NetFirewallProfile` |
+| **IP-konfiguration** | `ip a` | `ipconfig /all` |
 
 ---
 
-### 4. Rättigheter och Säkerhet (Den tysta mördaren)
+### 4. Nätverk Avancerat (OSI, DNS & DHCP)
 
-Ett av de absolut vanligaste problemen inom IT-infrastruktur är att en tjänst eller användare saknar rättigheter att läsa/skriva till en fil, och felet visas inte alltid tydligt.
+Följ alltid OSI-modellen: Börja nerifrån (Lager 1: Fysisk kabel/VM-nätverkskort) och jobba dig uppåt mot applikationen (Lager 7).
 
-* **Ubuntu:**
-* Kontrollera vem som äger filen: `ls -la /sökväg/till/fil`
-* Ändra ägare/rättigheter: `chown användare:grupp fil` och `chmod 755 fil`
-* *Glöm inte AppArmor!* Ubuntu använder säkerhetsmodulen AppArmor. Om en tjänst (t.ex. MySQL) vägrar starta trots rätt filrättigheter, kolla `dmesg` efter "apparmor="DENIED".
+| Mål | Ubuntu (Linux) | Windows 11 / Server |
+| --- | --- | --- |
+| **Kolla DNS-uppslag** | `dig domän.se` eller `nslookup domän.se` | PowerShell: `Resolve-DnsName domän.se` eller `nslookup` |
+| **Rensa DNS-cache** | `sudo systemd-resolve --flush-caches` | `ipconfig /flushdns` |
+| **Förnya IP (DHCP)** | `sudo dhclient -r` (släpp) sedan `sudo dhclient` | `ipconfig /release` sedan `ipconfig /renew` |
+| **Spåra trafikväg** | `traceroute IP` | `tracert IP` |
 
-
-* **Windows:**
-* Högerklicka på mappen -> Egenskaper -> Säkerhet (NTFS-rättigheter).
-* Tänk på **UAC** (User Account Control). Även om du är inloggad som administratör i Windows måste du ibland aktivt välja "Kör som administratör" för att terminalen (PowerShell/CMD) ska få fulla rättigheter.
-
-
+*Verification:* Om `ping 8.8.8.8` (Google) fungerar, men `ping google.com` misslyckas, har du ett DNS-problem.
 
 ---
 
-### 5. Använd AI som din Seniora Mentor (För studenter)
+### 5. Domän- och Katalogtjänster (Active Directory & GPO)
 
-Eftersom du studerar är AI (ChatGPT, Claude, Copilot) ett fantastiskt verktyg för att accelerera ditt lärande, men det måste användas smart:
+Primärt för Windows Server-miljöer när inloggningar misslyckas eller rättigheter inte appliceras.
 
-1. **Översätt obegripliga fel:** Får du en Windows Event-logg med en kryptisk hexadecimal felkod (t.ex. `0x80070005`) eller en lång Java-stacktrace i Ubuntu? Klistra in den i AI:n och be: *"Förklara detta fel enkelt och ge mig 3 steg för att felsöka det."*
-2. **Lär dig kommandots anatomi:** Istället för att bara kopiera ett kommando, be AI:n: *"Förklara vad varje flagga i kommandot `netstat -ano | findstr :80` gör."*
-3. **Bygg skript:** Be AI:n hjälpa dig skriva PowerShell-skript (Windows) eller Bash-skript (Ubuntu) för att automatisera din felsökning.
-4. **SÄKERHETSREGEL:** Klistra **aldrig** in inloggningsuppgifter, API-nycklar eller konfidentiella nätverksstrukturer. Ersätt alltid IP-adresser och användarnamn med `[Dolt]` innan du skickar prompten.
+| Mål | Kommando / Verktyg (Windows) |
+| --- | --- |
+| **Kolla domänhälsa** | `dcdiag` (Körs på domänkontrollanten för att hitta AD-replikeringsfel) |
+| **Framtvinga GPO** | `gpupdate /force` (Kör på klienten för att hämta senaste policyn) |
+| **Vilka GPO:er gäller?** | `gpresult /r` (sammanfattning) eller `gpresult /h report.html` (detaljerad vy) |
+| **Kolla domän-trust** | PowerShell: `Test-ComputerSecureChannel -Verbose` (Om False, datorn har tappat AD-kopplingen) |
+
+*Verification:* Om `Test-ComputerSecureChannel` returnerar "True" är den säkra kanalen mellan datorn och domänkontrollanten intakt.
 
 ---
 
-### 6. Felsökningsloopen & Eskalering
+### 6. Pakethantering och Uppdateringar ("Dependency Hell")
 
-När du fastnar (och det kommer du göra), följ denna tankemodell:
+När installationer avbryts, uppdateringar fastnar eller paket är korrupta.
 
-1. **Vad har ändrats nyligen?** (90% av alla fel beror på en nyligen genomförd uppdatering eller konfigurationsändring).
-2. **Dela upp problemet (Divide & Conquer):** Fungerar det lokalt på servern? Om ja -> Nätverksfel. Om nej -> Server/Applikationsfel.
-3. **Googla rätt:** Sök på *exakta* felmeddelanden inom citattecken, t.ex. `"Event ID 4625" "Windows Server 2022"`.
-4. **Eskalera/Backa:** Om du lagt mer än 1-2 timmar utan framsteg på en labb:
-* Återställ din snapshot och börja om (ofta snabbast i en lärmiljö).
-* Skriv ner vad du har testat och fråga din lärare eller kurskamrater. Att kunna beskriva *vad* du redan felsökt är en extremt viktig färdighet i arbetslivet.
+| Mål | Ubuntu (Linux) | Windows 11 / Server |
+| --- | --- | --- |
+| **Laga trasiga paket** | `sudo apt --fix-broken install` | Kör "Windows Update Troubleshooter" i inställningar |
+| **Tvinga omkonfiguration** | `sudo dpkg --configure -a` | `sfc /scannow` (Reparerar korrupta systemfiler) |
+| **Rensa paket-cache** | `sudo apt clean` och `sudo apt autoremove` | Radera innehållet i `C:\Windows\SoftwareDistribution\Download` |
+| **Reparera OS-avbild** | *(Krävs sällan på samma sätt i Linux)* | `DISM /Online /Cleanup-Image /RestoreHealth` |
+
+*Verification:* Kör uppdateringskommandot igen (`apt update && apt upgrade` eller sök efter Windows Updates). Går det igenom utan felkoder är beroendeproblemet löst.
+
+---
+
+### 7. Uppstartsproblem och Krascher (BSoD/Kernel Panic)
+
+När systemet vägrar starta upp till inloggningsskärmen.
+
+| Mål | Ubuntu (Linux) | Windows 11 / Server |
+| --- | --- | --- |
+| **Felsäkert läge** | Håll inne `Shift` eller `Esc` vid boot för att nå GRUB. Välj "Advanced options" -> "Recovery mode". | Tryck F8 (äldre) eller avbryt uppstarten 3 ggr för att nå "Advanced Startup Options" -> Safe Mode. |
+| **Trasigt filsystem?** | Boota från Live-USB. Kör `sudo fsck /dev/sdX` på den trasiga partitionen. | Starta i Recovery. Öppna CMD och kör `chkdsk C: /f /r`. |
+| **Analysera kraschdump** | Läs `/var/crash/` eller granska förra booten med `journalctl -b -1`. | Öppna filer i `C:\Windows\Minidump` med programmet **WinDbg** för att se vilken drivrutin som orsakade BSoD. |
+
+---
+
+### 8. Rättigheter och Säkerhet (Den tysta mördaren)
+
+När en tjänst borde fungera men får "Access Denied".
+
+| Mål | Ubuntu (Linux) | Windows 11 / Server |
+| --- | --- | --- |
+| **Kolla filägare** | `ls -la /sökväg/till/fil` | Högerklicka -> Egenskaper -> Säkerhet |
+| **Sätt rättigheter** | `chown användare:grupp fil` och `chmod 755 fil` | Redigera NTFS-rättigheter via GUI eller `icacls` i CMD |
+| **Kolla säkerhetsmodul** | Leta efter `DENIED` i dmesg: `dmesg | grep apparmor` | Starta terminalen "Som Administratör" (UAC blockerar annars vissa skript) |
+
+---
+
+### 9. AI som Felsökningsmentor
+
+Som student är AI ditt bästa verktyg för att förstå *varför* något är trasigt:
+
+1. **Avkoda felmeddelanden:** Klistra in obegripliga BSoD-hexkoder (t.ex. `0x0000007B`) eller Linux-stacktraces och be om orsaken.
+2. **Kommando-anatomi:** Be AI förklara flaggor. Ex: *"Vad gör flaggorna i `chkdsk /f /r`?"*
+3. **Automatisering:** Be AI skriva basen för ett PowerShell- eller Bash-skript för att samla in loggar automatiskt.
+4. **SÄKERHETSREGEL:** Byt alltid ut riktiga IP-adresser, domännamn, användarnamn och lösenord mot `[MASKERAT]` innan du klistrar in loggar i en AI.
