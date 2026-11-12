@@ -77,8 +77,6 @@ Klassiskt verktyg som samlar filer och kataloger till en enskild arkivfil (`.tar
 Modert backup-verktyg med inbyggd blockbaserad deduplicering, autentisering och AES-256-kryptering. Borg delar upp filer i variabla block och lagrar endast unika block, vilket minskar lagringsbehovet vid historisk säkerhetskopiering.
 * *Bäst för:* Regelbunden, krypterad och utrymmeseffektiv säkerhetskopiering till lokala eller avlägsna servrar.
 
-
-
 ---
 
 ## 3. Driftkontinuitet och verifierad återställning
@@ -99,49 +97,44 @@ Säkerhetskopiering är inte fullständig förrän återställningsförmågan ha
 * **Regelbundna DR-övningar:** Genomförande av planerade skarpa eller simulerade återställningsövningar för att mäta om den faktiska återställningstiden matchar organisationens uppsatta RTO- och RPO-mål.
 * **Dataintegritets- och nyckelhantering:** Löpande validering av att säkerhetskopior inte har korrumperats (via checksummor) samt verifiering av att nödvändiga krypteringsnycklar och behörigheter finns tillgängliga vid en återställning.
 
-
+---
 
 #### Övning 1 - Simulera backupdisk i vår VM
 
 För att simulera en separat backupdisk i vår Ubuntu VM så skapar vi en extra virtuell disk som "Ubuntu använder" som övnings- och backupdisk. Den här disken är en fil på värddatorn, inte en fysisk disk. I VirtualBox skapas den via Virtual Media Manager, och sedan ansluts den till VM:ens lagringsstyrenhet.
 
+#### 1. Skapa den virtuella disken i VirtualBox & koppla in den
+
+Stäng av Ubuntu-VM:en helt – pausa eller spara inte bara dess tillstånd.
+
+Öppna VirtualBox. Öppna Tools/Verktyg → Virtual Media Manager/Mediahanterare. I vissa versioner kan du också gå via VM:ens Settings/Inställningar → Storage/Lagring och välja att skapa en ny hårddisk.
+
+Välj Hard Disks/Hårddiskar och klicka Create/Skapa.
+
+Välj diskformat. VDI är ett bra val om disken bara ska användas i VirtualBox.
+
+Välj Dynamically allocated/Dynamiskt allokerad för en övningsdisk. Då växer diskfilen på värddatorn efter hand, upp till den angivna maxstorleken. Vi skapar en mindre storlek för denna övning, välj 5 GB.
+
+Ge disken ett tydligt namn, till exempel ubuntu-backup.vdi, och klicka Finish/Slutför
+
+För att koppla in disken i VirtualBox markerar du Ubuntu VM:en och öppnar Settings/Inställningar → Storage/Lagring.
+
+Markera VM:ens SATA Controller. (Om ingen SATA-styrenhet finns, lägg till en med " + "-knappen/ikonen för att lägga till lagringsstyrenhet/controller.)
+
+Klicka på ikonen för att lägga till hårddisk bredvid styrenheten.
+
+Välj Choose Existing Disk/Välj befintlig disk och välj ubuntu-backup.vdi som du nyss skapade. Alternativt kan du skapa disken härifrån direkt.
+
+Bekräfta med OK och starta Ubuntu-VM:en.
 
 
-1. Skapa den virtuella disken i VirtualBox & koppla in den
-
-    Stäng av Ubuntu-VM:en helt – pausa eller spara inte bara dess tillstånd.
-
-    Öppna VirtualBox. Öppna Tools/Verktyg → Virtual Media Manager/Mediahanterare. I vissa versioner kan du också gå via VM:ens Settings/Inställningar → Storage/Lagring och välja att skapa en ny hårddisk.
-    Välj Hard Disks/Hårddiskar och klicka Create/Skapa.
-
-    Välj diskformat. VDI är ett bra val om disken bara ska användas i VirtualBox.
-
-    Välj Dynamically allocated/Dynamiskt allokerad för en övningsdisk. Då växer diskfilen på värddatorn efter hand, upp till den angivna maxstorleken. Vi skapar en mindre storlek för denna övning, välj 5 GB.
-
-    Ge disken ett tydligt namn, till exempel ubuntu-backup.vdi, och klicka Finish/Slutför
-
-    För att koppla in disken i VirtualBox markerar du Ubuntu VM:en och öppnar Settings/Inställningar → Storage/Lagring.
-
-    Markera VM:ens SATA Controller. (Om ingen SATA-styrenhet finns, lägg till en med " + "-knappen/ikonen för att lägga till lagringsstyrenhet/controller.)
-
-    Klicka på ikonen för att lägga till hårddisk bredvid styrenheten.
-
-    Välj Choose Existing Disk/Välj befintlig disk och välj ubuntu-backup.vdi som du nyss skapade. Alternativt kan du skapa disken härifrån direkt.
-
-    Bekräfta med OK och starta Ubuntu-VM:en.
-
- 
-
- 
-2. Skapa partition och formatera den virtuella disken i Ubuntu
+#### 2. Skapa partition och formatera den virtuella disken i Ubuntu
 
 För att kunna använda vår nya disk så måste vi preparera den genom att formatera den till ett passande filsystem och partitionera den. Varning: Formatering raderar innehållet på den valda partitionen. Kontrollera noga att du arbetar med den nya, tomma disken och inte någon annan disk.
 
- 
-
 1. Öppna Terminal och kör först:
 
-lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS
+`lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS`
 
 Identifiera den nya disken genom storleken.
 I exemplet nedan antar vi att den heter /dev/sdb och att den nya partitionen blir /dev/sdb1 (dina namn kan vara annorlunda.)
@@ -149,24 +142,19 @@ I exemplet nedan antar vi att den heter /dev/sdb och att den nya partitionen bli
 
 2. Skapa partitionen:
 
-sudo fdisk /dev/sdb
+`sudo fdisk /dev/sdb`
 
 I fdisk skriver du n för en ny partition och följer standardvalen för att använda hela disken. Skriv sedan w för att spara ändringarna.
-
  
 
 3. Formatera därefter partitionen:
 
 sudo mkfs.ext4 -L BACKUP /dev/sdb1
 
- 
-
 4. Skapa en monteringspunkt och montera den:
 
 sudo mkdir -p /mnt/backup
 sudo mount /dev/sdb1 /mnt/backup
-
- 
 
 5. Kontrollera att den är monterad:
 
@@ -174,37 +162,36 @@ df -h /mnt/backup
 
 Kommandona för att partitionera, formatera och montera förutsätter att du byter ut enhetsnamnen (/dev/sdb) mot det som faktiskt visas hos dig i steg 1.
 
-
  
 #### Övning 2 - Genomföra och verifiera återställning i VM
 
 Mål: Praktiskt skapa en säkerhetskopia av en viktig katalog på din Ubuntu VM, simulera en dataförlust genom att radera katalogen, samt genomföra och verifiera återställningen enligt en strukturerad rutin (kursmål 10 och 12).
 Huvudmoment och instruktioner
 
-    Skapa testdata
+Skapa testdata
 
-        Skapa en eller flera kataloger, tex /home/student/viktig_data/ och lägg till tre testfiler med textinnehåll.
+Skapa en eller flera kataloger, tex /home/student/viktig_data/ och lägg till tre testfiler med textinnehåll.
 
-    Genomför säkerhetskopiering (tar eller rsync)
+Genomför säkerhetskopiering (tar eller rsync)
 
-        Skapa ett komprimerat arkiv av katalogen och spara det på vår separata backup-disk (/mnt/backup/)
+Skapa ett komprimerat arkiv av katalogen och spara det på vår separata backup-disk (/mnt/backup/)
 
-        sudo tar -cvzf /mnt/backup/viktig_data_$(date +%Y%m%m).tar.gz /home/student/viktig_data/
+sudo tar -cvzf /mnt/backup/viktig_data_$(date +%Y%m%m).tar.gz /home/student/viktig_data/
 
-    Simulera incident (Dataförlust)
+Simulera incident (Dataförlust)
 
-        Radera ursprungskatalogen permanent:
+Radera ursprungskatalogen permanent:
 
-        rm -rf /home/student/viktig_data/
+rm -rf /home/student/viktig_data/
 
-    Återställ data & Verifiera integritet
+Återställ data & Verifiera integritet
 
-        Återställ arkivet till sin ursprungliga plats.
+Återställ arkivet till sin ursprungliga plats.
 
-        Verifiera att alla tre filer finns kvar och att innehållet i dem stämmer överens med originalfilerna.
+Verifiera att alla tre filer finns kvar och att innehållet i dem stämmer överens med originalfilerna.
 
-    Dokumentera rutinen
 
-        Dokumentera den tekniska rutinen för backup och återställning, så att arbetet kan utföras på samma sätt varje gång. Beskriv kort vem i verksamheten som ansvarar, hur backupen kontrolleras och var dokumentationen ska finnas.
+##### Dokumentera rutinen
+Dokumentera den tekniska rutinen för backup och återställning, så att arbetet kan utföras på samma sätt varje gång. Beskriv kort vem i verksamheten som ansvarar, hur backupen kontrolleras och var dokumentationen ska finnas.
 
-        Skriv en enkel instruktion för återställning från arkivet, till exempel i 3–5 steg:
+Skriv en enkel instruktion för återställning från arkivet, till exempel i 3–5 steg:
