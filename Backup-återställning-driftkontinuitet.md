@@ -149,16 +149,16 @@ I fdisk skriver du n för en ny partition och följer standardvalen för att anv
 
 3. Formatera därefter partitionen:
 
-sudo mkfs.ext4 -L BACKUP /dev/sdb1
+`sudo mkfs.ext4 -L BACKUP /dev/sdb1`
 
 4. Skapa en monteringspunkt och montera den:
 
-sudo mkdir -p /mnt/backup
-sudo mount /dev/sdb1 /mnt/backup
+`sudo mkdir -p /mnt/backup
+sudo mount /dev/sdb1 /mnt/backup`
 
 5. Kontrollera att den är monterad:
 
-df -h /mnt/backup
+`df -h /mnt/backup`
 
 Kommandona för att partitionera, formatera och montera förutsätter att du byter ut enhetsnamnen (/dev/sdb) mot det som faktiskt visas hos dig i steg 1.
 
@@ -176,13 +176,13 @@ Genomför säkerhetskopiering (tar eller rsync)
 
 Skapa ett komprimerat arkiv av katalogen och spara det på vår separata backup-disk (/mnt/backup/)
 
-sudo tar -cvzf /mnt/backup/viktig_data_$(date +%Y%m%m).tar.gz /home/student/viktig_data/
+`sudo tar -cvzf /mnt/backup/viktig_data_$(date +%Y%m%m).tar.gz /home/student/viktig_data/`
 
 Simulera incident (Dataförlust)
 
 Radera ursprungskatalogen permanent:
 
-rm -rf /home/student/viktig_data/
+`rm -rf /home/student/viktig_data/`
 
 Återställ data & Verifiera integritet
 
