@@ -1,7 +1,5 @@
 # AI assisterad felsökning och verifiering
 
-Mall för AI felsökningslogg:
-
 ## AI-Felsökningslogg
 
 **Problem/Felmeddelande:** [Klistra in loggen från systemctl/journalctl]
