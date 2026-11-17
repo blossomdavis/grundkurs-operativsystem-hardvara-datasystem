@@ -2,20 +2,18 @@
 
 ## AI-Felsökningslogg
 
-**Problem/Felmeddelande:** [Klistra in loggen från systemctl/journalctl]
-* **Formulerad Prompt:** [Vad du frågade AI:n]
-* **AI-verktygets förslag:** [Kort sammanfattning av AI:ns svar]
-* **Kritisk granskning & Verifiering:** [Ser det rimligt ut, googla/testa commands]
-  * Fungerade förslaget? (Ja/Nej)
-  * Innehöll förslaget hallucinationer eller osäkra kommandon? (beskriv) 
-* **Slutgiltig åtgärd:** [Vad du faktiskt körde i din VM för att lösa problemet]
+* **Problem/Felmeddelande:** 
+* **Formulerad Prompt:** 
+* **AI-verktygets förslag:** 
+* **Kritisk granskning & Verifiering:** 
+* **Slutgiltig åtgärd:** 
 ---
 
 ## Praktisk AI-assisterad felsökning & verifiering
 
 Mål: Praktiskt öva på att använda AI för att felsöka ett simulerat serverfel, verifiera förslaget i din virtuella maskin (VM) och dokumentera resultatet samt eventuella avvikelser.
 
-#### 1. Simulera ett driftstopp
+#### 1. Problem - Simulera ett driftstopp
 
 **Testa att framkalla ett stopp i SSH-tjänsten och lägg till ett syntaxsfel i /etc/ssh/sshd_config.**
 
@@ -26,12 +24,12 @@ Mål: Praktiskt öva på att använda AI för att felsöka ett simulerat serverf
 #### 2. Generera en diagnostik-prompt
 
 **Kopiera felmeddelandet från systemctl status ssh eller journalctl -xeu ssh.
-Formulera en strukturera prompt till valfritt AI-verktyg:**
+Formulera en prompt till valfritt AI-verktyg:**
 
 *"Jag får följande felmeddelande på min Ubuntu Server vid start av SSH: [KLISTRA IN LOGG]. Vad är den mest sannolika orsaken och hur åtgärdar jag det?"*
 
 #### 3. Kritisk granskning & Testning
-**AI-svaret:** Loggen i din skärmdump visar att `systemd` försökte starta SSH-tjänsten fem gånger i rad (`restart counter is at 5`), men att varje försök misslyckades direkt (`exit-code`).
+**AI-verktygets förslag:** Loggen i din skärmdump visar att `systemd` försökte starta SSH-tjänsten fem gånger i rad (`restart counter is at 5`), men att varje försök misslyckades direkt (`exit-code`).
 
 Den absolut vanligaste orsaken till detta är ett **syntaxfel eller stavfel i konfigurationsfilen** (`/etc/ssh/sshd_config`), en ogiltig sökväg till en nyckel eller att den port SSH försöker använda redan är upptagen. `systemd` talar bara om *att* tjänsten kraschade, inte *varför*.
 
@@ -69,8 +67,8 @@ sudo systemctl start ssh
 *Verifiering:* Kör `sudo systemctl status ssh`. Statusen ska nu visas som **active (running)** i grön text.
 
 
-**Utvärdera AI-verktygets lösningsförslag. Stämmer kommandona med din nuvarande OS-version?
-Testkör åtgärden i din VM och verifiera om tjänsten startar.**
-- Kommandona stämmde med min nuvarande OS och jag testkörde åtgärden och det gick felfritt. Inga frågetecken heller gällande kommandona, Bra att säkerhetskopiera innan man labbar, särskilt i en sådan övning. 
+#### Kritisk granskning, Verifiering & Slutgiltig åtgärd
 
+Kommandona stämmde med min nuvarande OS och jag testkörde åtgärden och det gick felfritt. Inga frågetecken heller gällande kommandona. Bra att säkerhetskopiera innan man labbar, särskilt i en sådan övning. Det som jag borde lagt till i prompten är "fråga mig de frågor du behöver för att lösa uppgiften på bästa och säkraste sätt.", jag tror det hade gjort ett mer kritiskt svar. Sedan även be den förklara varje kommando eller flagga, så att man inte bara antar att man kan alla tecken.  
 
+Efter att ha granskat och förstått AI-förslaget så genomförde jag lösningen och det gav inga felmeddelanden och tjänsten fungerade igen! 
