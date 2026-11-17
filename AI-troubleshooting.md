@@ -2,12 +2,12 @@
 
 ## AI-Felsökningslogg
 
-* **Problem/Felmeddelande:** 
-* **Formulerad Prompt:** 
-* **AI-verktygets förslag:** 
-* **Kritisk granskning & Verifiering:** 
-* **Slutgiltig åtgärd:** 
----
+* **Problem/Felmeddelande** 
+* **Formulerad Prompt** 
+* **AI-verktygets förslag** 
+* **Kritisk granskning & Verifiering** 
+* **Slutgiltig åtgärd** 
+
 
 ## Praktisk AI-assisterad felsökning & verifiering
 
