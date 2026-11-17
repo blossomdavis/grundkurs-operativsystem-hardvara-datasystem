@@ -72,3 +72,20 @@ sudo systemctl start ssh
 Kommandona stämmde med min nuvarande OS och jag testkörde åtgärden och det gick felfritt. Inga frågetecken heller gällande kommandona. Bra att säkerhetskopiera innan man labbar, särskilt i en sådan övning. Det som jag borde lagt till i prompten är "fråga mig de frågor du behöver för att lösa uppgiften på bästa och säkraste sätt.", jag tror det hade gjort ett mer kritiskt svar. Sedan även be den förklara varje kommando eller flagga, så att man inte bara antar att man kan alla tecken.  
 
 Efter att ha granskat och förstått AI-förslaget så genomförde jag lösningen och det gav inga felmeddelanden och tjänsten fungerade igen! 
+
+
+## Källkritik vid IT-felsökning
+Origin & Authenticity
+- [ ] Kontrollera avsändaren - Är det officiell tillverkardokumentation/RFC?
+- [ ] Verifiera domän och webbadress - Är det tillverkarens riktiga domän eller en klon?
+- [ ] Sök primärkällan vid AI- eller forumsvar - Kan du hitta samma flagga hos tillverkarens egna docs?
+
+Versions- & miljökontroll
+- [ ] Matcha mjukvaru- och OS-version - Gäller instruktionen samma OS och version?
+- [ ] Granska publicering och datum - Är lösningen aktuell eller föråldrad?
+
+Tillförlitlighet & säkerhet (Reliability)
+- [ ] Läs hela kommandot innan det körs - Förstår du varje flagga?
+- [ ] Bedöm konsekvens och återställning - Finns backup/snapshot innan den körs? 
+- [ ] Säkerställ att supportavtalet inte bryts - Är lösningen en officiellt stödd åtgärd av leverantör/tillverkare?
+
